@@ -162,5 +162,5 @@ cython_debug/
 assignment-2/wandb/*
 assignment-2/models_weights/*
 assignment-2/.idea
-assignment-2/date/*
+assignment-2/data/
 week_3
