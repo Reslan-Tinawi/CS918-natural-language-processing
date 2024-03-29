@@ -1,10 +1,10 @@
 import collections
 
-import torch
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, f1_score
-from tqdm import tqdm
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
+from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix, f1_score
+from tqdm import tqdm
 
 
 def get_accuracy(prediction, label):
@@ -21,7 +21,7 @@ def train(dataloader, model, loss_fn, optimizer, epoch, device, is_bert, wandb_r
     epoch_losses = []
     epoch_accuracies = []
 
-    for batch in tqdm(dataloader, desc=f"Training Epoch {epoch + 1}"):
+    for batch in tqdm(dataloader, desc=f"Training Epoch {epoch}"):
         if is_bert:
             tweet_ids, tweet_token_ids, attention_mask, labels = batch
             tweet_token_ids = tweet_token_ids.to(device)
@@ -72,7 +72,7 @@ def evaluate(dataloader, model, loss_fn, epoch, device, is_bert, wandb_run):
     epoch_accuracies = []
 
     with torch.no_grad():
-        for batch in tqdm(dataloader, desc=f"Evaluating Epoch {epoch + 1}"):
+        for batch in tqdm(dataloader, desc=f"Evaluating Epoch {epoch}"):
 
             if is_bert:
                 tweet_ids, tweet_token_ids, attention_mask, labels = batch
@@ -121,18 +121,29 @@ def training_loop(
     criterion,
     optimizer,
     device,
+    is_bert,
     wandb_run,
+    model_path
 ):
     metrics = collections.defaultdict(list)
 
     best_valid_loss = float("inf")
 
     for epoch in range(1, n_epochs + 1):
+
         train_loss, train_acc = train(
-            train_dataloader, model, criterion, optimizer, epoch, device, wandb_run
+            train_dataloader,
+            model,
+            criterion,
+            optimizer,
+            epoch,
+            device,
+            is_bert,
+            wandb_run,
         )
+
         valid_loss, valid_acc = evaluate(
-            development_dataloader, model, criterion, epoch, device, wandb_run
+            development_dataloader, model, criterion, epoch, device, is_bert, wandb_run
         )
 
         metrics["train_losses"].append(train_loss)
@@ -143,7 +154,7 @@ def training_loop(
 
         if valid_loss < best_valid_loss:
             best_valid_loss = valid_loss
-            torch.save(model.state_dict(), "../lstm.pt")
+            torch.save(model.state_dict(), model_path)
 
         print(f"epoch: {epoch}")
         print(f"train_loss: {train_loss:.3f}, train_acc: {train_acc:.3f}")
