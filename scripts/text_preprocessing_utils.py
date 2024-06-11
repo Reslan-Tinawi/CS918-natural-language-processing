@@ -7,29 +7,64 @@ import wordsegment
 from ekphrasis.dicts.emoticons import emoticons
 from ekphrasis.dicts.noslang.slangdict import slangdict
 
-# TODO: do we have to load every time?
 wordsegment.load()
 
 
 def normalize_with_without(tweet: str):
+    """
+    Normalizes the text by replacing 'w/' with 'with' and 'w/o' with 'without'.
+
+    Args:
+        tweet (str): The input tweet to be normalized.
+
+    Returns:
+        str: The normalized tweet.
+    """
     tweet = re.sub(r"w/", "with", tweet)
     tweet = re.sub(r"w/o", "without", tweet)
     return tweet
 
 
 def remove_user_mentions(tweet: str):
+    """
+    Removes user mentions from a given tweet.
+
+    Args:
+        tweet (str): The tweet text.
+
+    Returns:
+        str: The tweet text with user mentions removed.
+    """
     user_handle_pattern = re.compile(r"(@[a-zA-Z0-9_]+)")
 
     return user_handle_pattern.sub("", tweet)
 
 
 def remove_tweet_hashtag(tweet: str):
+    """
+    Removes hashtags from a given tweet.
+
+    Args:
+        tweet (str): The tweet to remove hashtags from.
+
+    Returns:
+        str: The tweet with hashtags removed.
+    """
     hashtag_pattern = re.compile(r"#(\w+)")
 
     return hashtag_pattern.sub("", tweet)
 
 
 def remove_url(tweet: str):
+    """
+    Removes URLs from a given tweet.
+
+    Args:
+        tweet (str): The input tweet containing URLs.
+
+    Returns:
+        str: The tweet with URLs removed.
+    """
     url_pattern = re.compile(
         r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
     )
@@ -38,54 +73,77 @@ def remove_url(tweet: str):
 
 
 def remove_special_characters(tweet: str):
+    """
+    Removes special characters from a given tweet.
+
+    Args:
+        tweet (str): The tweet to remove special characters from.
+
+    Returns:
+        str: The tweet with special characters removed.
+    """
     special_characters_pattern = re.compile(r"[^a-zA-Z0-9\s]")
 
     return special_characters_pattern.sub("", tweet)
 
 
 def remove_digits(tweet: str):
-    # remove digit with ordinal suffix
+    """
+    Removes digits from a given tweet.
+
+    Parameters:
+        tweet (str): The tweet to remove digits from.
+
+    Returns:
+        str: The tweet with digits removed.
+    """
     digits_pattern = re.compile(r"\d+(st|nd|rd|th)?")
 
     return digits_pattern.sub("", tweet)
 
 
 def remove_single_characters(tweet: str):
+    """
+    Removes single characters from a given tweet.
+
+    Args:
+        tweet (str): The input tweet.
+
+    Returns:
+        str: The tweet with single characters removed.
+    """
     single_characters_pattern = re.compile(r"\b\w\b")
 
     return single_characters_pattern.sub("", tweet)
 
 
-def preprocess_tweet(tweet: str, tokenizer) -> list[str]:
-    tweet = remove_url(tweet)  # what about emails?
-    tweet = remove_user_mentions(tweet)
-    tweet = remove_tweet_hashtag(tweet)
-    tweet = remove_special_characters(tweet)
-    tweet = remove_digits(tweet)
-    tweet = remove_single_characters(tweet)
-    # remove leading and trailing spaces
-    tweet = tweet.strip()
-    # remove multiple spaces
-    tweet = re.sub(r"\s+", " ", tweet)
-
-    # replace RT or rt with empty string
-    tweet = re.sub(r"\bRT\b", "", tweet)
-
-    # lowercase
-    tweet = tweet.lower()
-
-    tweet_tokens = tokenizer(tweet)
-
-    return tweet_tokens
-
-
 def clean_word(word: str) -> str:
+    """
+    Cleans a word by removing special characters and single characters.
+
+    Args:
+        word (str): The word to be cleaned.
+
+    Returns:
+        str: The cleaned word.
+    """
     word = remove_special_characters(word)
     word = remove_single_characters(word)
     return word
 
 
-def advanced_preprocessing(tweet: str, tokenizer):
+def preprocess_tweet(tweet: str, tokenizer):
+    """
+    Preprocesses a tweet by performing various text cleaning operations.
+
+    Args:
+        tweet (str): The input tweet to be preprocessed.
+        tokenizer: The tokenizer object used to tokenize the tweet.
+
+    Returns:
+        str: The preprocessed tweet as a string.
+
+    """
     # start by removing user mentions and urls
     tweet = tweet.lower()
     tweet = normalize_with_without(tweet)
@@ -128,24 +186,9 @@ def advanced_preprocessing(tweet: str, tokenizer):
     # remove empty strings and stopwords
     stopwords = set(nltk.corpus.stopwords.words("english"))
     clean_text_tokens_list = [
-        token for token in clean_text_tokens_list if len(token) > 1 and token not in stopwords
+        token.lower()
+        for token in clean_text_tokens_list
+        if len(token) > 1 and token not in stopwords
     ]
-
-    # final_clean_text_tokens_list = []
-    #
-    # for idx, token in enumerate(clean_text_tokens_list):
-    #     token = token.lower()
-    #
-    #     if not emoji_mask[idx]:
-    #         # emoji don't have special characters, digits, or single characters
-    #         # emoji is not in stopwords
-    #         token = remove_special_characters(token)
-    #         token = remove_digits(token)
-    #         token = remove_single_characters(token)
-    #         if token in stopwords.words("english"):
-    #             continue
-    #
-    #     if len(token) > 1:
-    #         final_clean_text_tokens_list.append(token)
 
     return " ".join(clean_text_tokens_list)

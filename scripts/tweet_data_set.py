@@ -18,7 +18,12 @@ class TweetsDataset(Dataset):
         tweet = self.tweets[idx]
         label = self.labels[idx]
 
-        tweet_tensor = torch.tensor(self.vocab.lookup_indices(tweet), dtype=torch.long)
+        tweet_tokens = tweet.split()
+
+        tweet_tensor = torch.tensor(
+            self.vocab.lookup_indices(tweet_tokens), dtype=torch.long
+        )
+
         tweet_label = self.label_encoder.transform([label]).squeeze()
 
         return tweet_id, tweet_tensor, tweet_label

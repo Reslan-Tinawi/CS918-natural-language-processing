@@ -13,8 +13,9 @@ def plot_wordcloud(wordcloud, title: str):
     plt.title(title)
     plt.show()
 
+
 def generate_ngram_frequencies(
-        corpus: list[str], n_grams: int, max_features
+    corpus: list[str], n_grams: int, max_features
 ) -> dict[str, int]:
     vectorizer = CountVectorizer(
         ngram_range=(n_grams, n_grams), stop_words="english", max_features=max_features
@@ -26,9 +27,11 @@ def generate_ngram_frequencies(
     ngram_freq = dict(zip(ngram_list, sum_ngrams))
     return ngram_freq
 
+
 def generate_wordcloud_with_ngrams(
-        ngram_freq: dict[str, int], n_grams: int, wordcloud_title: str
+    ngram_freq: dict[str, int], n_grams: int, wordcloud_title: str
 ):
+
     # Load the twitter logo image
     twitter_mask = np.array(Image.open("twitter_mask.png"))
 
@@ -57,7 +60,7 @@ def plot_top_common_ngrams(n_gram_freq_dict_list: list[dict[str, int]]):
         n_gram_freq_df = n_gram_freq_df.head(10)
 
         # color by frequency
-        cmap = plt.cm.Reds_r
+        cmap = plt.cm.Reds
         norm = plt.Normalize(
             n_gram_freq_df["frequency"].min(), n_gram_freq_df["frequency"].max()
         )
