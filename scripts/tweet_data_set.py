@@ -3,6 +3,21 @@ from torch.utils.data import Dataset
 
 
 class TweetsDataset(Dataset):
+    """
+    A custom dataset class for handling tweet data.
+
+    Args:
+        tweet_ids (list): List of tweet IDs.
+        tweets (list): List of tweet texts.
+        labels (list): List of tweet labels.
+        vocab (Vocab): Vocabulary object for tokenization.
+        label_encoder (LabelEncoder): LabelEncoder object for label encoding.
+
+    Returns:
+        tuple: A tuple containing the tweet ID, tokenized tweet tensor, and label.
+
+    """
+
     def __init__(self, tweet_ids, tweets, labels, vocab, label_encoder):
         self.tweet_ids = tweet_ids
         self.tweets = tweets
@@ -30,6 +45,20 @@ class TweetsDataset(Dataset):
 
 
 class BERTTweetsDataset(Dataset):
+    """
+    A PyTorch dataset class for processing tweets using BERT.
+
+    Args:
+        tweet_ids (list): List of tweet IDs.
+        tweets (list): List of tweets.
+        labels (list): List of labels.
+        tokenizer: The BERT tokenizer.
+        label_encoder: The label encoder.
+
+    Returns:
+        tuple: A tuple containing the tweet ID, tweet tensor, tweet mask, and tweet label.
+    """
+
     def __init__(self, tweet_ids, tweets, labels, tokenizer, label_encoder):
         self.tweet_ids = tweet_ids
         self.tweets = tweets
@@ -50,8 +79,6 @@ class BERTTweetsDataset(Dataset):
         )
         tweet_tensor = torch.tensor(tweet_dict["input_ids"], dtype=torch.long)
         tweet_mask = torch.tensor(tweet_dict["attention_mask"], dtype=torch.long)
-
-        # tweet_tokens_ids = self.tokenizer(tweet, truncation=True)["input_ids"]
 
         tweet_label = self.label_encoder.transform([label]).squeeze()
 

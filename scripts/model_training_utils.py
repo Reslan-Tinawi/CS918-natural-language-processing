@@ -172,6 +172,25 @@ def training_loop(
     wandb_run,
     model_path,
 ):
+    """
+    Training loop for training a model.
+
+    Args:
+        n_epochs (int): Number of epochs to train the model.
+        train_dataloader: Dataloader for the training data.
+        development_dataloader: Dataloader for the development data.
+        model: The model to be trained.
+        criterion: The loss function used for training.
+        optimizer: The optimizer used for training.
+        device: The device to be used for training (e.g., 'cpu', 'cuda').
+        is_bert (bool): Indicates whether the model is a BERT model.
+        wandb_run: WandB run object for logging metrics.
+        model_path: Path to save the best model.
+
+    Returns:
+        dict: A dictionary containing the training and validation metrics.
+    """
+
     metrics = collections.defaultdict(list)
 
     best_valid_loss = float("inf")
@@ -212,6 +231,21 @@ def training_loop(
 
 
 def plot_metrics(metrics, model_name):
+    """
+    Plots the training and validation metrics for a given model.
+
+    Args:
+        metrics (dict): A dictionary containing the training and validation metrics.
+            It should have the following keys:
+            - "train_losses": A list of training losses for each epoch.
+            - "valid_losses": A list of validation losses for each epoch.
+            - "train_accs": A list of training accuracies for each epoch.
+            - "valid_accs": A list of validation accuracies for each epoch.
+        model_name (str): The name of the model.
+
+    Returns:
+        None
+    """
 
     n_epochs = len(metrics["train_losses"])
 
@@ -231,7 +265,7 @@ def plot_metrics(metrics, model_name):
     ax.plot(metrics["train_accs"], label="train accuracy")
     ax.plot(metrics["valid_accs"], label="valid accuracy")
     ax.set_xlabel("epoch")
-    ax.set_ylabel("loss")
+    ax.set_ylabel("accuracy")
     ax.set_xticks(range(n_epochs))
     ax.legend()
     ax.grid()
@@ -239,6 +273,17 @@ def plot_metrics(metrics, model_name):
 
 
 def plot_confusion_matrix(y_true, y_pred, model_name):
+    """
+    Plots the confusion matrix for a given set of true labels and predicted labels.
+
+    Parameters:
+        y_true (array-like): The true labels.
+        y_pred (array-like): The predicted labels.
+        model_name (str): The name of the model.
+
+    Returns:
+        None
+    """
 
     # computer F1-macro score
     f1_macro = f1_score(y_true, y_pred, average="macro")
@@ -258,6 +303,19 @@ def plot_confusion_matrix(y_true, y_pred, model_name):
 
 
 def get_labels_and_predictions(model, dataloader, label_encoder, device, is_bert):
+    """
+    Get the true labels and predicted labels for a given model and dataloader.
+
+    Args:
+        model (torch.nn.Module): The trained model.
+        dataloader (torch.utils.data.DataLoader): The dataloader for the dataset.
+        label_encoder (sklearn.preprocessing.LabelEncoder): The label encoder used to encode the labels.
+        device (torch.device): The device to run the model on.
+        is_bert (bool): Whether the model is a BERT model or not.
+
+    Returns:
+        tuple: A tuple containing the true labels and predicted labels.
+    """
     # get model predictions
     model.eval()
 
