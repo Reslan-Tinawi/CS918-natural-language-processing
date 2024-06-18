@@ -5,7 +5,6 @@ import numpy as np
 import torch
 from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix, f1_score
 from tqdm import tqdm
-import seaborn as sns
 
 
 def get_accuracy(y_pred, y_true):
@@ -288,13 +287,14 @@ def plot_confusion_matrix(y_true, y_pred, model_name):
     # computer F1-macro score
     f1_macro = f1_score(y_true, y_pred, average="macro")
 
-    labels = ["positive", "negative", "neutral"]
     # compute confusion matrix
-    conf_matrix = confusion_matrix(y_true, y_pred, normalize="true", labels=labels)
-
-    disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix)
-
-    disp.plot(cmap="Blues")
+    disp = ConfusionMatrixDisplay.from_predictions(
+        y_true,
+        y_pred,
+        display_labels=["neutral", "positive", "negative"],
+        cmap=plt.cm.Blues,
+        normalize="true",
+    )
 
     plt.title(f"{model_name}\nF1-macro: {f1_macro:.3f}")
     plt.ylabel("Actual")
