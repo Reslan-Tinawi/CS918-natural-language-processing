@@ -1,76 +1,108 @@
-# Project stutructre
+# CS918 Natural Language Processing - Sentiment Analysis Project
 
-The project consists of:
+This project explores machine learning and deep learning approaches for Twitter sentiment analysis, classifying tweets as **positive**, **negative**, or **neutral**.
 
-1. Single standalone jupyter notebook (`solution.ipynb`) file which include **all** the experiments, model development, data exploration, etc.
+## 📋 Overview
 
-2. Data folder: this folder should store the 5 text files of the SemEval data as well as the GloVe embedding file.
+We implement and compare traditional ML models (Naive Bayes, Logistic Regression, SVM) and deep learning models (Bi-LSTM, Bi-LSTM with Attention, BERT). The workflow covers data preprocessing, EDA, model training, and evaluation.
 
-3. Utility scripts: to guarnte the notebook is manageable and short, redaundant code such as model definition, text pre-processing logic, metrics plotting and so on, have been moved to separate scripts and then imported in the notebook.
-
-4. Model weights folder: this folder will contain the weight of the models trained. While running the notebook, the best model weights for each of LSTM, LSTM with Attention, and BERT will be stored in this folder. Later, these weights will be used to re-create the model and generate predictions.
-
-5. Sbatch script: this script is used to start a jupyter server on the DCS batch machines.
-
-6. twitter mask: this is a logo of twitter which will be used for generate wordclouds.
-
-# Running instructions
-
-Running this notebook requires availability of GPU for training LSTM models and fine-tuning BERT models.
-
-The notebook has been developed and tested on the [DCS batch compute machines](https://warwick.ac.uk/fac/sci/dcs/intranet/user_guide/batch_compute/).
-
-The `jupyter.sbatch` script file is reposible for starting a jupyter server on the `falcon` machine.
-
-The easist way to connect to DCS machines and run a jupyter notebook is using [VS Code](https://code.visualstudio.com/) along with [remote SSH extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh) and [Jupyter extension](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter)
-
-To run the code, first copy the content of the project to DCS machines. Download the SemEval data and GloVe embedding and place them in the `data` folder. Then ssh into kudu.
-
-First, we connect to the `kudu` machine using VS Code. Pres `Ctrl (⌘) + Shift + P` in vscode and select `Connect to remote SSH`:
-
-![alt text](image.png)
-
-Then, input the following for kudu host machine:
+## 🗂️ Structure
 
 ```
-kudu.dcs.warwick.ac.uk
+CS918-natural-language-processing/
+├── README.md
+├── requirements.txt
+├── solution.ipynb
+├── data/
+│   ├── glove.6B.100d.txt
+│   ├── twitter-training-data.txt
+│   ├── twitter-dev-data.txt
+│   ├── twitter-test1.txt
+│   ├── twitter-test2.txt
+│   └── twitter-test3.txt
+├── models_weights/
+│   ├── naive_bayes_model.joblib
+│   ├── logistic_regression_model.joblib
+│   ├── svm_model.joblib
+│   ├── lstm_model.pt
+│   ├── lstm_with_attention_model.pt
+│   ├── bert_raw_tweets.pt
+│   └── bert_cleaned_tweets.pt
+└── scripts/
+    ├── __init__.py
+    ├── data_loading_utils.py
+    ├── model_training_utils.py
+    ├── models.py
+    ├── plotting_utilities.py
+    ├── text_preprocessing_utils.py
+    └── tweet_data_set.py
 ```
 
-This will prompt you to input your DCS username and password.
+## 📊 Dataset
 
-After connecting to `kudu`, change directory to the project directory:
+- **Training**: 45,101 tweets (46% neutral, 35% positive, 18% negative)
+- **Development**: 2,000 tweets (similar distribution)
 
-```
-cd PROJECT_DIRECTORY
-```
+## 🔧 Preprocessing
 
-Once in the project directory, submit the job for running jupyter notebook as follows:
+Pipeline includes normalization, mention/URL removal, hashtag and emoji handling, slang/contraction expansion, tokenization (NLTK TweetTokenizer), and cleaning.
 
-```
-sbatch jupyter.sbatch
-```
+## 🤖 Models
 
-**NOTE**: please note that while working on the assignment, the `falcon` partition was available. If you try to submit the job but with no success, please consider changing the partition to one of: `gecko` or `eagle`. This might affect the running time of the notebook.
+- **Naive Bayes**: TF-IDF, best CV score 0.615
+- **Logistic Regression**: TF-IDF/Count n-grams, accuracy 0.63
+- **SVM**: TF-IDF, accuracy 0.63
+- **Bi-LSTM**: GloVe embeddings, 2 layers, bidirectional
+- **Bi-LSTM + Attention**: Adds self-attention
+- **BERT**: bert-base-uncased, tested on raw and cleaned tweets
 
-To change partition, in the `jupyter.sbatch` file, modify the 4-th line:
+## 📈 Results (Validation)
 
-```
-#SBATCH --partition=PARTITION_NAME      # Partition you wish to use (see above for list)
-```
+| Model                | Precision | Recall | F1   | Acc  |
+|----------------------|-----------|--------|------|------|
+| Naive Bayes          | 0.62      | 0.56   | 0.58 | 0.62 |
+| Logistic Regression  | 0.63      | 0.63   | 0.62 | 0.63 |
+| SVM                  | 0.64      | 0.63   | 0.61 | 0.63 |
 
-After successfully running the jobs, two files will be created in the project directory:
+- **Class imbalance**: Negative class recall is lowest.
+- **Neutral class**: Highest performance due to size.
+- **Traditional ML and DL**: Comparable results.
 
-1. `jupyter.err`
-2. `jupyter.log`
+## 📊 EDA
 
-Open the `jupyter.err` file and copy the server URL. An example URL would be something like this:
+- Tweet length by sentiment
+- N-gram and word cloud analysis
+- UMAP visualization
 
-```
-http://falcon-03:11888/tree?token=d53197876aeabda2885256ab38988d5dacc745cf735de6f2
-```
+## 🚀 Getting Started
 
-Now, open the `solution.ipynb` notebook file and choose `select kernel`:
+1. Clone repo & install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Download NLTK data:
+   ```python
+   import nltk; nltk.download('stopwords')
+   ```
+3. Run `solution.ipynb` in Jupyter.
 
-![alt text](image-1.png)
+## 📦 Key Dependencies
 
-Paste the jupyter server URL in the input box and you should be connected to a GPU-enabled machine.
+- pandas, numpy, nltk, ekphrasis, emoji, contractions
+- scikit-learn, joblib
+- PyTorch, torchtext, transformers
+- matplotlib, seaborn, wordcloud, umap-learn
+
+See [requirements.txt](requirements.txt) for details.
+
+## 📝 Modules
+
+- `models.py`: LSTM, LSTM+Attention, BERT architectures
+- `text_preprocessing_utils.py`: Cleaning, normalization
+- `data_loading_utils.py`: Data and embedding loaders
+- `model_training_utils.py`: Training, metrics, plots
+- `tweet_data_set.py`: PyTorch datasets
+
+---
+
+**Note**: This project is part of an academic assignment for CS918 at the University of Warwick.
